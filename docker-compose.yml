@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  node:
+    build:
+      context: ./wing-docker/node
+    tty: true
+    volumes:
+      - ./next:/var/www/next
+    ports:
+      - "3000:3000"
+
+  workspace:
+    build:
+      context: ./wing-docker/go
+    volumes:
+      - ./go:/var/www/src
+    ports:
+      - 8080:8080
+    tty: true
+    command: air
+    depends_on:
+      - mysql
+      - redis
+
+  redis:
+    build:
+      context: ./wing-docker/redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./wing-docker/data/redis:/data
+
+  mysql:
+    image: mysql:8
+    ports:
+      - 43306:3306
+    volumes:
+      - mysql-store:/var/lib/mysql
+      - ./wing-docker/logs:/var/log/mysql
+      - ./wing-docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - TZ=${TZ}
+      
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8888:80
+    links:
+      - mysql
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=${PMA_USER}
+      - PMA_PASSWORD=${PMA_PASSWORD}
+volumes:
+  mysql-store:
