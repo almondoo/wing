@@ -1,6 +1,6 @@
-import React, { ReactNode } from "react";
-import Style from "./style";
-import Head from "next/head";
+import React, { ReactNode } from 'react';
+import Style from './style';
+import Head from 'next/head';
 
 const Layout = ({ children }: { children: ReactNode }): JSX.Element => {
   return (

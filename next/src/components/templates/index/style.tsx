@@ -1,9 +1,9 @@
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 const Wrapper = styled.div``;
 
 const exportDefault = {
-    Wrapper
-}
+  Wrapper,
+};
 
-export default exportDefault
+export default exportDefault;
