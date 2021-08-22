@@ -40,7 +40,7 @@ func InitDB() (*Repositories, error) {
 	}
 
 	//- 自動的にテーブルを生成する
-	db.AutoMigrate(&entity.Role{}, &entity.User{})
+	db.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.Project{}, &entity.Task{}, &entity.TaskStatus{}, &entity.TaskPriority{})
 
 	return &Repositories{
 		User: persistence.NewUserRepository(db),

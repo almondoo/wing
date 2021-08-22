@@ -10,6 +10,8 @@ import (
 
 type User struct {
 	ID              uint       `json:"id"`
+	RoleID          uint       `json:"role_id"`
+	Role            *Role      `json:"role"`
 	Name            string     `json:"name" gorm:"size:100;not null" validate:"required,max=100"`
 	Email           string     `json:"email" gorm:"size:255;not null;unique" validate:"required,max=255"`
 	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`

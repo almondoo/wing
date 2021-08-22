@@ -15,31 +15,31 @@ func NewUserSeeder(db *gorm.DB) *userSeeder {
 	return &userSeeder{conn: db}
 }
 
-func (ags *userSeeder) Seeder() {
+func (us *userSeeder) Seeder() {
 	pass, err := security.Hash("testuser")
 	if err != nil {
 		return
 	}
 
-	ags.create(entity.User{
+	us.create(entity.User{
 		Name:     "test1",
 		Email:    "user1@example.com",
 		Password: pass,
 	})
-	ags.create(entity.User{
+	us.create(entity.User{
 		Name:     "test2",
 		Email:    "user2@example.com",
 		Password: pass,
 	})
-	ags.create(entity.User{
+	us.create(entity.User{
 		Name:     "test3",
 		Email:    "user3@example.com",
 		Password: pass,
 	})
 }
 
-func (ags *userSeeder) create(entity entity.User) error {
-	tx := ags.conn.Begin()
+func (us *userSeeder) create(entity entity.User) error {
+	tx := us.conn.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
