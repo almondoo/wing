@@ -8,10 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-type Task struct {
+type TaskChild struct {
 	ID             uint          `json:"id"`
-	ProjectID      uint32        `json:"projectId" gorm:"not null" validate:"required"`
-	Project        *Project      `json:"project"`
+	TaskID         uint          `json:"taskId" gorm:"not null" validate:"required"`
+	Task           *Task         `json:"task"`
 	CreateUserID   uint          `json:"create_user_id"`
 	CreateUser     *User         `json:"createUser"`
 	Title          string        `json:"title" gorm:"size:255"`
@@ -26,71 +26,70 @@ type Task struct {
 	EndDate        *time.Time    `json:"endDate"`
 	CreatedAt      time.Time     `json:"createdAt" gorm:"not null"`
 	UpdatedAt      time.Time     `json:"updatedAt" gorm:"not null"`
-	TaskChildren   []TaskChild   `json:"taskChildren"`
 }
 
-func (t *Task) TableName() string {
-	return "tasks"
+func (tc *TaskChild) TableName() string {
+	return "task_children"
 }
 
-func (t *Task) BeforeSave(tx *gorm.DB) error {
+func (tc *TaskChild) BeforeSave(tx *gorm.DB) error {
 	v := validation.DBValidatorInit()
-	if err := v.Validate(t); err != nil {
+	if err := v.Validate(tc); err != nil {
 		return err
 	}
-	if ok := t.isExistsProject(tx); !ok {
-		return errors.New("プロジェクトが存在しません。")
+	if ok := tc.isExistsTask(tx); !ok {
+		return errors.New("親タスクが存在しません。")
 	}
-	if ok := t.isExistsTaskStatus(tx); !ok {
+	if ok := tc.isExistsTaskStatus(tx); !ok {
 		return errors.New("タスクの状態が存在しません。")
 	}
-	if ok := t.isExistsTaskPriority(tx); !ok {
+	if ok := tc.isExistsTaskPriority(tx); !ok {
 		return errors.New("優先順位が存在しません。")
 	}
-	if ok := t.isExistsCreateUser(tx); !ok {
+	if ok := tc.isExistsCreateUser(tx); !ok {
 		return errors.New("作成者が存在しません。")
 	}
-	if ok := t.isExistsAssignUser(tx); !ok {
+	if ok := tc.isExistsAssignUser(tx); !ok {
 		return errors.New("割り当てられたユーザーが存在しません。")
 	}
 	return nil
 }
 
-func (t *Task) isExistsProject(tx *gorm.DB) bool {
-	project := &Project{}
-	if err := tx.Where("id = ?", t.ProjectID).First(project).Error; err != nil {
+func (tc *TaskChild) isExistsTask(tx *gorm.DB) bool {
+	task := &Task{}
+	if err := tx.Where("id = ?", tc.TaskID).First(task).Error; err != nil {
 		return false
 	}
 	return true
 }
 
-func (t *Task) isExistsTaskStatus(tx *gorm.DB) bool {
+func (tc *TaskChild) isExistsTaskStatus(tx *gorm.DB) bool {
 	taskStatus := &TaskStatus{}
-	if err := tx.Where("id = ?", t.TaskStatusID).First(taskStatus).Error; err != nil {
+	if err := tx.Where("id = ?", tc.TaskStatusID).First(taskStatus).Error; err != nil {
 		return false
 	}
 	return true
 }
 
-func (t *Task) isExistsTaskPriority(tx *gorm.DB) bool {
+func (tc *TaskChild) isExistsTaskPriority(tx *gorm.DB) bool {
 	taskPriority := &TaskPriority{}
-	if err := tx.Where("id = ?", t.TaskPriorityID).First(taskPriority).Error; err != nil {
+	if err := tx.Where("id = ?", tc.TaskPriorityID).First(taskPriority).Error; err != nil {
 		return false
 	}
 	return true
 }
 
-func (t *Task) isExistsCreateUser(tx *gorm.DB) bool {
+func (tc *TaskChild) isExistsCreateUser(tx *gorm.DB) bool {
 	user := &User{}
-	if err := tx.Where("id = ?", t.CreateUserID).First(user).Error; err != nil {
+	if err := tx.Where("id = ?", tc.CreateUserID).First(user).Error; err != nil {
 		return false
 	}
 	return true
 }
 
-func (t *Task) isExistsAssignUser(tx *gorm.DB) bool {
+func (tc *TaskChild) isExistsAssignUser(tx *gorm.DB) bool {
 	user := &User{}
-	if err := tx.Where("id = ?", t.AssignUserID).First(user).Error; err != nil {
+	if err := tx.Where("id = ?", tc.AssignUserID).First(user).Error; err != nil {
 		return false
 	}
 	return true

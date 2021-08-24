@@ -40,7 +40,7 @@ func InitDB() (*Repositories, error) {
 	}
 
 	//- 自動的にテーブルを生成する
-	db.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.Project{}, &entity.Task{}, &entity.TaskStatus{}, &entity.TaskPriority{})
+	db.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.Project{}, &entity.Task{}, &entity.TaskChild{}, &entity.TaskStatus{}, &entity.TaskPriority{})
 
 	return &Repositories{
 		User: persistence.NewUserRepository(db),
@@ -63,4 +63,9 @@ func (r *Repositories) Seeder() {
 	db := r.DB
 	seed.NewRoleSeeder(db).Seeder()
 	seed.NewUserSeeder(db).Seeder()
+	seed.NewTaskStatusSeeder(db).Seeder()
+	seed.NewTaskPrioritySeeder(db).Seeder()
+	seed.NewProjectSeeder(db).Seeder()
+	seed.NewTaskSeeder(db).Seeder()
+	seed.NewTaskChildSeeder(db).Seeder()
 }

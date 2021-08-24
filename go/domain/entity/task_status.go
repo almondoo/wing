@@ -8,9 +8,10 @@ import (
 )
 
 type TaskStatus struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name" gorm:"size:30;not null;unique" validate:"required,max=30"`
-	Tasks []Task `json:"tasks"`
+	ID           uint        `json:"id"`
+	Name         string      `json:"name" gorm:"size:30;not null;unique" validate:"required,max=30"`
+	Tasks        []Task      `json:"tasks"`
+	TaskChildren []TaskChild `json:"taskChildren"`
 }
 
 func (r *TaskStatus) TableName() string {
