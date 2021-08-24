@@ -13,30 +13,27 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const AuthorTypeUser = "user"
-const AuthorTypeAdmin = "admin"
-const AuthorTypeArtist = "artist"
+// AccesssExpires はアクセストークンの制限時間
+const AccessExpires = time.Minute * 15
+
+// RefreshExpires はアクセストークンの制限時間
+const RefreshExpires = time.Hour * 24 * 30
 
 type (
 	Token struct{}
 
-	AdminToken struct{}
-
-	ArtistToken struct{}
-
 	TokenInterface interface {
 		CreateToken(int) (*TokenDetails, error)
 		ExtractTokenMetadata(string) (*AccessDetails, error)
-		IsSameAuthorType(string) bool
 	}
 
-	//- 暗号化されたjwtトークン
+	// 暗号化されたjwtトークン
 	TokenData struct {
 		AccessToken  string
 		RefreshToken string
 	}
 
-	//- アクセストークンのuuid
+	// アクセストークンのuuid
 	AccessDetails struct {
 		TokenUuid string
 		UserId    uint64
@@ -52,55 +49,29 @@ type (
 	}
 )
 
-/*
-トークンが三つに別れているがタイポミスやadminの場所でuserのトークン発行してしまったりと
-ヒューマンエラーミスを減らすために三つに別れている。
-*/
-func NewUserToken() *Token {
+// 構造体を生成する
+func NewToken() *Token {
 	return &Token{}
 }
 
-func NewAdminToken() *AdminToken {
-	return &AdminToken{}
-}
-
-func NewArtistToken() *ArtistToken {
-	return &ArtistToken{}
-}
-
-//Token implements the TokenInterface
+// トークンのインターファイスを実装する
 var _ TokenInterface = &Token{}
 
 func (t *Token) CreateToken(userId int) (*TokenDetails, error) {
-	return createToken(userId, AuthorTypeUser)
-}
-
-func (t *AdminToken) CreateToken(adminId int) (*TokenDetails, error) {
-	return createToken(adminId, AuthorTypeAdmin)
-}
-
-func (t *ArtistToken) CreateToken(artistId int) (*TokenDetails, error) {
-	return createToken(artistId, AuthorTypeArtist)
-}
-
-const AccessExpires = time.Minute * 15
-const RefreshExpires = time.Hour * 24 * 30
-
-func createToken(id int, authorType string) (*TokenDetails, error) {
 	td := &TokenDetails{}
 	td.AtExpires = time.Now().Add(AccessExpires).Unix()
 	td.TokenUuid = uuid.New().String()
 
 	td.RtExpires = time.Now().Add(RefreshExpires).Unix()
-	td.RefreshUuid = td.TokenUuid + "++" + strconv.Itoa(id)
+	td.RefreshUuid = td.TokenUuid + "++" + strconv.Itoa(userId)
 
 	var err error
 	//Creating Access Token
 	atClaims := jwt.MapClaims{}
-	atClaims["author_type"] = authorType
+	atClaims["author_type"] = "user"
 	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.TokenUuid
-	atClaims["author_id"] = id
+	atClaims["author_id"] = userId
 	atClaims["exp"] = td.AtExpires
 	atClaims["iat"] = time.Now()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
@@ -108,11 +79,12 @@ func createToken(id int, authorType string) (*TokenDetails, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	//Creating Refresh Token
 	rtClaims := jwt.MapClaims{}
-	rtClaims["author_type"] = authorType
+	rtClaims["author_type"] = "user"
 	rtClaims["refresh_uuid"] = td.RefreshUuid
-	rtClaims["author_id"] = id
+	rtClaims["author_id"] = userId
 	rtClaims["exp"] = td.RtExpires
 	atClaims["iat"] = time.Now()
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
@@ -123,18 +95,8 @@ func createToken(id int, authorType string) (*TokenDetails, error) {
 	return td, nil
 }
 
-//- トークンデータ出す
+// トークンデータ出す
 func (t *Token) ExtractTokenMetadata(tokenString string) (*AccessDetails, error) {
-	return extractTokenMetadata(tokenString, AuthorTypeUser)
-}
-func (t *AdminToken) ExtractTokenMetadata(tokenString string) (*AccessDetails, error) {
-	return extractTokenMetadata(tokenString, AuthorTypeAdmin)
-}
-func (t *ArtistToken) ExtractTokenMetadata(tokenString string) (*AccessDetails, error) {
-	return extractTokenMetadata(tokenString, AuthorTypeArtist)
-}
-
-func extractTokenMetadata(tokenString string, authorType string) (*AccessDetails, error) {
 	token, err := VerifyToken(tokenString)
 	if err != nil {
 		return nil, err
@@ -157,19 +119,8 @@ func extractTokenMetadata(tokenString string, authorType string) (*AccessDetails
 	return nil, err
 }
 
-//- jwtデータとAuthorType同じかどうか検証
-func (t *Token) IsSameAuthorType(authorType string) bool {
-	return authorType == AuthorTypeUser
-}
-func (t *AdminToken) IsSameAuthorType(authorType string) bool {
-	return authorType == AuthorTypeAdmin
-}
-func (t *ArtistToken) IsSameAuthorType(authorType string) bool {
-	return authorType == AuthorTypeArtist
-}
-
 /* Access Token start */
-//- トークンを正しいかチェック
+// トークンを正しいかチェック
 func TokenValid(tokenString string) bool {
 	if _, err := VerifyToken(tokenString); err != nil {
 		return false
@@ -177,7 +128,7 @@ func TokenValid(tokenString string) bool {
 	return true
 }
 
-//- jwtデータ取得
+// jwtデータ取得
 func FetchTokenClaims(tokenString string) (jwt.MapClaims, error) {
 	token, err := VerifyToken(tokenString)
 	if err != nil {
@@ -190,9 +141,9 @@ func FetchTokenClaims(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-//- トークンが正しいか
+// トークンが正しいか
 func VerifyToken(tokenString string) (*jwt.Token, error) {
-	//- 検証
+	// 検証
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -211,7 +162,7 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 /* Access Token end */
 
 /* Refresh Token start */
-//- トークンが正しいかチェック
+// トークンが正しいかチェック
 func RefreshTokenValid(refreshTokenString string) bool {
 	if _, err := VerifyRefreshToken(refreshTokenString); err != nil {
 		return false
@@ -219,7 +170,7 @@ func RefreshTokenValid(refreshTokenString string) bool {
 	return true
 }
 
-//- tokenデータ取得
+// tokenデータ取得
 func FetchRefreshTokenClaims(refreshTokenString string) (jwt.MapClaims, error) {
 	token, err := VerifyRefreshToken(refreshTokenString)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-//- Next.jsをホスティングしているの場所にアクセスできるようにCORSを設定
+// Next.jsをホスティングしているの場所にアクセスできるようにCORSを設定
 func CORSMiddleware() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{os.Getenv("CORS_URL")},
@@ -34,45 +34,37 @@ func CORSMiddleware() echo.MiddlewareFunc {
 	})
 }
 
-//- csrf
+// csrf
 func CSRFMiddleware() echo.MiddlewareFunc {
 	return middleware.CSRFWithConfig(middleware.CSRFConfig{
-		TokenLookup:    "header:X-CSRF-TOKEN",
-		CookieDomain:   os.Getenv("CORS_DOMAIN"),
-		CookieName:     "csrf",
-		CookieSecure:   true,
+		TokenLookup:  "header:X-CSRF-TOKEN",
+		CookieDomain: os.Getenv("CORS_DOMAIN"),
+		CookieName:   "csrf",
+		// CookieSecure:   true, // SSLが常時した時にコメントアウトを取る
 		CookieHTTPOnly: true,
 	})
 }
 
-//- ユーザー側の認証
+// ユーザー側の認証
 /*
  * authName 認証するユーザータイプ user | artist | admin
  */
 func AuthMiddleware(authenticate auth.AuthInterface, token auth.TokenInterface) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return context.CastContext(func(c *context.CustomContext) error {
+			fmt.Println("jwt")
 			c.SetAuthorID(0)
 
 			tokens := c.GetCookieToken()
-			fmt.Println(tokens)
-			//- エラーではなかったら
+			// エラーではなかったら
 			if ok := auth.TokenValid(tokens.AccessToken); ok {
-				//- エラーではなかったら
+				// エラーではなかったら
 				if claims, err := auth.FetchTokenClaims(tokens.AccessToken); err == nil {
-					//- エラーではなかったら
+					// エラーではなかったら
 					if ok := authenticate.AuthValid(claims["access_uuid"].(string)); ok {
-						if ok := token.IsSameAuthorType(claims["author_type"].(string)); !ok {
-							return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-								"data": map[string]string{
-									"error": "author_typeエラー",
-								},
-								"status": "ng",
-							})
-						}
 						intID := int(claims["author_id"].(float64))
 						c.SetAuthorID(uint(intID))
-						return nil
+						return next(c)
 					}
 				}
 			}
@@ -97,14 +89,6 @@ func AuthMiddleware(authenticate auth.AuthInterface, token auth.TokenInterface) 
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
 					"data": map[string]string{
 						"error": "このリフレッシュトークンは使用できません。",
-					},
-					"status": "ng",
-				})
-			}
-			if ok := token.IsSameAuthorType(claims["author_type"].(string)); !ok {
-				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-					"data": map[string]string{
-						"error": "author_typeエラー",
 					},
 					"status": "ng",
 				})

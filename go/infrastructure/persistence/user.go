@@ -31,7 +31,7 @@ func (ur *UserRepository) FindByID(id uint) (*entity.User, error) {
 	return user, nil
 }
 
-//- 作成
+// 作成
 func (ur *UserRepository) CreateUser(user *entity.User) (*entity.User, error) {
 	tx := ur.Conn.Begin()
 	defer func() {
@@ -52,7 +52,7 @@ func (ur *UserRepository) CreateUser(user *entity.User) (*entity.User, error) {
 	return user, tx.Commit().Error
 }
 
-//- 更新
+// 更新
 func (ur *UserRepository) Update(user *entity.User) (*entity.User, error) {
 	tx := ur.Conn.Begin()
 	defer func() {
@@ -72,7 +72,7 @@ func (ur *UserRepository) Update(user *entity.User) (*entity.User, error) {
 	return user, tx.Commit().Error
 }
 
-//- 削除
+// 削除
 func (ur *UserRepository) Delete(user *entity.User) error {
 	if err := ur.Conn.Delete(&user).Error; err != nil {
 		return ErrDelete

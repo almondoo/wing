@@ -17,6 +17,8 @@ func (v *dbValidator) Validate(entity interface{}) error {
 	return v.vali.Struct(entity)
 }
 
+// 下記は使ってないかも
+// 調査が必要
 type validatorWithDB struct {
 	db *gorm.DB
 }

@@ -25,7 +25,7 @@ func main() {
 
 	e := echo.New()
 
-	//- CustomValidation
+	// CustomValidation
 	e.Validator = validation.NewValidator()
 
 	// Middleware
@@ -38,7 +38,7 @@ func main() {
 	authClient := storedb.NewRedisDB()
 	newAuth := auth.NewRedisAuth(authClient)
 
-	//- Repository
+	// Repository
 	repositories, err := db.InitDB()
 	if err != nil {
 		panic(err)
@@ -48,24 +48,29 @@ func main() {
 		repositories.Seeder()
 	}
 
-	//- validator
+	// validator
 	dbValidator := validation.NewValidatorWithDB(repositories.DB)
 	e.Use(middleware.CustomContextMiddleware(dbValidator))
 
-	//- Newトークン
-	userToken := auth.NewUserToken()
-	adminToken := auth.NewAdminToken()
+	// Newトークン
+	token := auth.NewToken()
 	group := e.Group("")
-	routing := handler.NewRouting(group, newAuth, userToken, adminToken)
+	routing := handler.NewRouting(group, newAuth, token)
 
-	//- 共通Routing
+	// 共通Routing
 	routing.InitCommonRouting()
 
-	//- User関連のRouting
-	userService := service.NewUserService(repositories.User, newAuth, userToken)
-	userUsecase := usecase.NewUserUsecase(userService, newAuth, userToken)
+	// User関連のRouting
+	userService := service.NewUserService(repositories.User, newAuth, token)
+	userUsecase := usecase.NewUserUsecase(userService, newAuth, token)
 	userHandler := handler.NewUserHandler(userUsecase)
 	routing.InitAuthUserRouting(userHandler)
+
+	// Role関連のRouting
+	roleService := service.NewRoleService(repositories.Role)
+	roleUsecase := usecase.NewRoleUsecase(roleService)
+	roleHandler := handler.NewRoleHandler(roleUsecase)
+	routing.InitRoleRouting(roleHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

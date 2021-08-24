@@ -54,13 +54,13 @@ func (c *CustomContext) CustomResponse(code int, i interface{}) error {
 	return c.JSON(code, response)
 }
 
-//- Cookieを設置
+// Cookieを設置
 func (c *CustomContext) SetCookieToken(accessToken, refreshToken string) {
 	c.CreateCookie(constant.AccessTokenName, accessToken, time.Now().Add(auth.AccessExpires))
 	c.CreateCookie(constant.RefreshTokenName, refreshToken, time.Now().Add(auth.RefreshExpires))
 }
 
-//- Cookieから取得
+// Cookieから取得
 func (c *CustomContext) GetCookieToken() *auth.TokenData {
 	return &auth.TokenData{
 		AccessToken:  c.GetCookieValue(constant.AccessTokenName),

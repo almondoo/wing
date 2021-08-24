@@ -18,12 +18,12 @@ function MyApp({ Component, pageProps }: AppProps): JSX.Element {
             revalidate: Revalidator,
             { retryCount }: Required<RevalidatorOptions>,
           ): void => {
-            //- 404は再試行しない
+            // 404は再試行しない
             if (error.status === 404) return;
 
             if (retryCount >= 5) return;
 
-            //- 5秒後に再試行
+            // 5秒後に再試行
             setTimeout(() => revalidate({ retryCount }), 3000);
           },
         }}

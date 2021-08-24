@@ -45,6 +45,7 @@ func (us *userService) Register(request *validation.UserRegisterRequest) (*entit
 	}
 
 	user := &entity.User{
+		RoleID:   20,
 		Name:     request.Name,
 		Email:    request.Email,
 		Password: password,

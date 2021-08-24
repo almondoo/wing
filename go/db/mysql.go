@@ -20,7 +20,7 @@ type Repositories struct {
 	DB   *gorm.DB
 }
 
-//- connetion確認func
+// connetion確認func
 func InitDB() (*Repositories, error) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
@@ -39,7 +39,7 @@ func InitDB() (*Repositories, error) {
 		return nil, err
 	}
 
-	//- 自動的にテーブルを生成する
+	// 自動的にテーブルを生成する
 	db.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.Project{}, &entity.Task{}, &entity.TaskChild{}, &entity.TaskStatus{}, &entity.TaskPriority{})
 
 	return &Repositories{

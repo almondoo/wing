@@ -46,7 +46,7 @@ func (cd *ClientData) CreateAuth(userid int, td *TokenDetails) error {
 	return nil
 }
 
-//- チェック
+// チェック
 func (cd *ClientData) AuthValid(tokenUuid string) bool {
 	if _, err := cd.FetchAuth(tokenUuid); err != nil {
 		return false
@@ -54,7 +54,7 @@ func (cd *ClientData) AuthValid(tokenUuid string) bool {
 	return true
 }
 
-//- jwtデータがあるかチェック
+// jwtデータがあるかチェック
 func (cd *ClientData) FetchAuth(tokenUuid string) (uint64, error) {
 	userid, err := cd.client.Get(tokenUuid)
 	if err != nil {
@@ -64,9 +64,9 @@ func (cd *ClientData) FetchAuth(tokenUuid string) (uint64, error) {
 	return userID, nil
 }
 
-//- リフレッシュトークンを削除
+// リフレッシュトークンを削除
 func (cd *ClientData) DeleteRefresh(refreshUuid string) error {
-	//- refreshトークン削除
+	// refreshトークン削除
 	err := cd.client.Delete(refreshUuid)
 	if err != nil {
 		return err
@@ -74,17 +74,17 @@ func (cd *ClientData) DeleteRefresh(refreshUuid string) error {
 	return nil
 }
 
-//- access & refresh 削除
+// access & refresh 削除
 func (cd *ClientData) DeleteTokens(authD *AccessDetails) error {
-	//- refresh_uuidを作成
+	// refresh_uuidを作成
 	refreshUuid := fmt.Sprintf("%s++%d", authD.TokenUuid, authD.UserId)
 
-	//- access_tokenを削除
+	// access_tokenを削除
 	if err := cd.client.Delete(authD.TokenUuid); err != nil {
 		return err
 	}
 
-	//- refresh_tokenを削除
+	// refresh_tokenを削除
 	if err := cd.client.Delete(refreshUuid); err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (cd *ClientData) DeleteTokens(authD *AccessDetails) error {
 	return nil
 }
 
-//- 残ったトークンを削除
+// 残ったトークンを削除
 func (cd *ClientData) DeleteRemainingToken(name string) error {
 	if err := cd.client.Delete(name); err != nil {
 		return err

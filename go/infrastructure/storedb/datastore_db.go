@@ -35,8 +35,8 @@ func (ds *DataStoreService) NewKey(kind, name string) *datastore.Key {
 	return datastore.NameKey(kind, name, nil)
 }
 
-//- 分単位
-//- データを登録
+// 分単位
+// データを登録
 func (ds *DataStoreService) Set(name string, value interface{}, ttl time.Duration) error {
 	key := ds.NewKey(name, name)
 
@@ -53,7 +53,7 @@ func (ds *DataStoreService) Set(name string, value interface{}, ttl time.Duratio
 	return nil
 }
 
-//- データを取得
+// データを取得
 func (ds *DataStoreService) Get(name string) (interface{}, error) {
 	key := ds.NewKey(name, name)
 	entity := new(Entity)
@@ -64,7 +64,7 @@ func (ds *DataStoreService) Get(name string) (interface{}, error) {
 	return entity.Value, nil
 }
 
-//- データを削除
+// データを削除
 func (ds *DataStoreService) Delete(name string) error {
 	key := ds.NewKey(name, name)
 	if err := ds.client.Delete(ds.ctx, key); err != nil {

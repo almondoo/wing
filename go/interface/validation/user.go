@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-//- ユーザーログイン時のリクエスト
+// ユーザーログイン時のリクエスト
 type UserLoginRequest struct {
 	Email    string `json:"email" form:"email" validate:"required,email"`
 	Password string `json:"password" form:"password" validate:"required"`
@@ -38,7 +38,7 @@ func UserLoginMessage(err error) map[string]string {
 	return nil
 }
 
-//- ユーザー作成時のリクエスト
+// ユーザー作成時のリクエスト
 type UserRegisterRequest struct {
 	Name            string `json:"name" form:"name" validate:"required,max=30"`
 	Email           string `json:"email" form:"email" validate:"required,email,max=255"`
