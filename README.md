@@ -56,14 +56,14 @@ echo 4系
 
 
 ```go
-"data": {
-  interface
-},
-"status": code < 300 ok else ng,
-"token": {
-  "AccessToken": "ey...",
-  "RefreshToken": "ey..."
-} or null
+{
+  "data": {
+    interface
+  },
+  "status": code < 300 ok else ng, 
+}
+or
+null
 ```
 
 ## 依存関係
