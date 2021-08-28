@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 	"wing/infrastructure/auth"
-	"wing/interface/validation"
 	"wing/utils/constant"
 
 	"github.com/labstack/echo/v4"
@@ -14,7 +13,6 @@ import (
 
 type CustomContext struct {
 	echo.Context
-	Vwd validation.ValidatorWithDB
 }
 
 type callFunc func(c *CustomContext) error
@@ -74,6 +72,7 @@ func (c *CustomContext) CreateCookie(name, value string, expires time.Time) {
 	cookie.Value = value
 	cookie.Expires = expires
 	cookie.Domain = os.Getenv("CORS_DOMAIN")
+	cookie.Path = "/"
 	cookie.HttpOnly = true
 	c.SetCookie(cookie)
 }

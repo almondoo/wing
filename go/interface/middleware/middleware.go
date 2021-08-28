@@ -6,13 +6,12 @@ import (
 	"os"
 	"wing/infrastructure/auth"
 	"wing/interface/context"
-	"wing/interface/validation"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-// Next.jsをホスティングしているの場所にアクセスできるようにCORSを設定
+// CORSMiddleware Next.jsをホスティングしているの場所にアクセスできるようにCORSを設定
 func CORSMiddleware() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{os.Getenv("CORS_URL")},
@@ -40,23 +39,22 @@ func CSRFMiddleware() echo.MiddlewareFunc {
 		TokenLookup:  "header:X-CSRF-TOKEN",
 		CookieDomain: os.Getenv("CORS_DOMAIN"),
 		CookieName:   "csrf",
+		CookiePath:   "/",
 		// CookieSecure:   true, // SSLが常時した時にコメントアウトを取る
 		CookieHTTPOnly: true,
 	})
 }
 
-// ユーザー側の認証
-/*
- * authName 認証するユーザータイプ user | artist | admin
- */
+// AuthMiddleware ユーザー側の認証
 func AuthMiddleware(authenticate auth.AuthInterface, token auth.TokenInterface) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return context.CastContext(func(c *context.CustomContext) error {
 			fmt.Println("jwt")
 			c.SetAuthorID(0)
 
+			// トークンを取得
 			tokens := c.GetCookieToken()
-			// エラーではなかったら
+			// トークンを確認
 			if ok := auth.TokenValid(tokens.AccessToken); ok {
 				// エラーではなかったら
 				if claims, err := auth.FetchTokenClaims(tokens.AccessToken); err == nil {
@@ -68,27 +66,32 @@ func AuthMiddleware(authenticate auth.AuthInterface, token auth.TokenInterface) 
 					}
 				}
 			}
+
+			// リフレッシュトークンを確認
 			if ok := auth.RefreshTokenValid(tokens.RefreshToken); !ok {
+				fmt.Println("リフレッシュトークンは正しくない")
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
 					"data": map[string]string{
-						"error": "リフレッシュトークンに不正な値が含まれています。",
+						"error": "認証に失敗しました。",
 					},
 					"status": "ng",
 				})
 			}
 			claims, err := auth.FetchRefreshTokenClaims(tokens.RefreshToken)
 			if err != nil {
+				fmt.Println("リフレッシュトークンのデータ取得失敗")
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
 					"data": map[string]string{
-						"error": "リフレッシュトークンのデータを取得できませんでした。",
+						"error": "認証に失敗しました。",
 					},
 					"status": "ng",
 				})
 			}
 			if ok := authenticate.AuthValid(claims["refresh_uuid"].(string)); !ok {
+				fmt.Println("使用できないリフレッシュトークン")
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
 					"data": map[string]string{
-						"error": "このリフレッシュトークンは使用できません。",
+						"error": "認証に失敗しました。",
 					},
 					"status": "ng",
 				})
@@ -121,10 +124,11 @@ func AuthMiddleware(authenticate auth.AuthInterface, token auth.TokenInterface) 
 	}
 }
 
-func CustomContextMiddleware(vwd validation.ValidatorWithDB) echo.MiddlewareFunc {
+// CustomContextMiddleware はカスタマイズされたコンテキストを生成する関数
+func CustomContextMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cc := &context.CustomContext{Context: c, Vwd: vwd}
+			cc := &context.CustomContext{Context: c}
 			return next(cc)
 		}
 	}

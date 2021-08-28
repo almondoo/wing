@@ -10,11 +10,11 @@ Messageのsuffixはバリデーションにかかった内容を返す
 */
 
 // 共通処理
-type RoleRequest struct {
+type TaskChildRequest struct {
 	Name string `json:"name" form:"name" validate:"required,max=30"`
 }
 
-func RoleMessage(err error) map[string]string {
+func TaskChildMessage(err error) map[string]string {
 	var errorMessages = make(map[string]string)
 	errors := err.(validator.ValidationErrors)
 	if len(errors) != 0 {

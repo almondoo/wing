@@ -33,6 +33,7 @@ func main() {
 	e.Use(mw.Recover())
 	e.Use(middleware.CSRFMiddleware())
 	e.Use(middleware.CORSMiddleware())
+	e.Use(middleware.CustomContextMiddleware())
 
 	// authClient, err := store.NewDataStoreDB(os.Getenv("PROJECT_ID"))
 	authClient := storedb.NewRedisDB()
@@ -47,10 +48,6 @@ func main() {
 	if os.Getenv("ENV") == "local" {
 		repositories.Seeder()
 	}
-
-	// validator
-	dbValidator := validation.NewValidatorWithDB(repositories.DB)
-	e.Use(middleware.CustomContextMiddleware(dbValidator))
 
 	// Newトークン
 	token := auth.NewToken()
@@ -71,6 +68,36 @@ func main() {
 	roleUsecase := usecase.NewRoleUsecase(roleService)
 	roleHandler := handler.NewRoleHandler(roleUsecase)
 	routing.InitRoleRouting(roleHandler)
+
+	// Role関連のRouting
+	taskPriorityService := service.NewTaskPriorityService(repositories.TaskPriority)
+	taskPriorityUsecase := usecase.NewTaskPriorityUsecase(taskPriorityService)
+	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase)
+	routing.InitTaskPriorityRouting(taskPriorityHandler)
+
+	// Role関連のRouting
+	taskStatusService := service.NewTaskStatusService(repositories.TaskStatus)
+	taskStatusUsecase := usecase.NewTaskStatusUsecase(taskStatusService)
+	taskStatusHandler := handler.NewTaskStatusHandler(taskStatusUsecase)
+	routing.InitTaskStatusRouting(taskStatusHandler)
+
+	// Role関連のRouting
+	projectService := service.NewProjectService(repositories.Project)
+	projectUsecase := usecase.NewProjectUsecase(projectService)
+	projectHandler := handler.NewProjectHandler(projectUsecase)
+	routing.InitProjectRouting(projectHandler)
+
+	// Role関連のRouting
+	taskService := service.NewTaskService(repositories.Task)
+	taskUsecase := usecase.NewTaskUsecase(taskService)
+	taskHandler := handler.NewTaskHandler(taskUsecase)
+	routing.InitTaskRouting(taskHandler)
+
+	// Role関連のRouting
+	taskChildService := service.NewTaskChildService(repositories.TaskChild)
+	taskChildUsecase := usecase.NewTaskChildUsecase(taskChildService)
+	taskChildHandler := handler.NewTaskChildHandler(taskChildUsecase)
+	routing.InitTaskChildRouting(taskChildHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

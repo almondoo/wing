@@ -15,9 +15,14 @@ import (
 )
 
 type Repositories struct {
-	User repository.UserRepository
-	Role repository.RoleRepository
-	DB   *gorm.DB
+	User         repository.UserRepository
+	Role         repository.RoleRepository
+	TaskPriority repository.TaskPriorityRepository
+	TaskStatus   repository.TaskStatusRepository
+	Project      repository.ProjectRepository
+	Task         repository.TaskRepository
+	TaskChild    repository.TaskChildRepository
+	DB           *gorm.DB
 }
 
 // connetion確認func
@@ -43,9 +48,14 @@ func InitDB() (*Repositories, error) {
 	db.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.Project{}, &entity.Task{}, &entity.TaskChild{}, &entity.TaskStatus{}, &entity.TaskPriority{})
 
 	return &Repositories{
-		User: persistence.NewUserRepository(db),
-		Role: persistence.NewRoleRepository(db),
-		DB:   db,
+		User:         persistence.NewUserRepository(db),
+		Role:         persistence.NewRoleRepository(db),
+		TaskPriority: persistence.NewTaskPriorityRepository(db),
+		TaskStatus:   persistence.NewTaskStatusRepository(db),
+		Project:      persistence.NewProjectRepository(db),
+		Task:         persistence.NewTaskRepository(db),
+		TaskChild:    persistence.NewTaskChildRepository(db),
+		DB:           db,
 	}, nil
 
 }

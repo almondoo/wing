@@ -7,9 +7,11 @@ import (
 )
 
 type RoleService interface {
-	Create(*validation.RoleCreateRequest) error
-	Update(*validation.RoleUpdateRequest) error
-	Delete(*validation.RoleDeleteRequest) error
+	Get() ([]*entity.Role, error)
+	GetDetail(id uint) (*entity.Role, error)
+	Create(*validation.RoleRequest) error
+	Update(uint, *validation.RoleRequest) error
+	Delete(uint) error
 }
 
 type roleService struct {
@@ -20,7 +22,14 @@ func NewRoleService(roleRepo repository.RoleRepository) RoleService {
 	return &roleService{roleRepo: roleRepo}
 }
 
-func (rs *roleService) Create(request *validation.RoleCreateRequest) error {
+func (rs *roleService) Get() ([]*entity.Role, error) {
+	return rs.roleRepo.Finds()
+}
+func (rs *roleService) GetDetail(id uint) (*entity.Role, error) {
+	return rs.roleRepo.FindByID(id)
+}
+
+func (rs *roleService) Create(request *validation.RoleRequest) error {
 	role := &entity.Role{
 		Name: request.Name,
 	}
@@ -28,9 +37,9 @@ func (rs *roleService) Create(request *validation.RoleCreateRequest) error {
 	return err
 }
 
-func (rs *roleService) Update(request *validation.RoleUpdateRequest) (err error) {
+func (rs *roleService) Update(id uint, request *validation.RoleRequest) (err error) {
 	var role *entity.Role
-	role, err = rs.roleRepo.FindByID(request.ID)
+	role, err = rs.roleRepo.FindByID(id)
 	if err != nil {
 		return
 	}
@@ -38,6 +47,6 @@ func (rs *roleService) Update(request *validation.RoleUpdateRequest) (err error)
 	return
 }
 
-func (rs *roleService) Delete(request *validation.RoleDeleteRequest) (err error) {
-	return rs.roleRepo.Delete(request.ID)
+func (rs *roleService) Delete(id uint) (err error) {
+	return rs.roleRepo.Delete(id)
 }

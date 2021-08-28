@@ -26,6 +26,14 @@ func (rr *roleRepository) FindByID(id uint) (*entity.Role, error) {
 	return role, nil
 }
 
+func (rr *roleRepository) Finds() ([]*entity.Role, error) {
+	var roles []*entity.Role
+	if err := rr.Conn.Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
 // Create 作成
 func (rr *roleRepository) Create(role *entity.Role) (*entity.Role, error) {
 	tx := rr.Conn.Begin()
