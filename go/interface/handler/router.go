@@ -12,7 +12,7 @@ import (
 type Routing interface {
 	InitCommonRouting()
 	InitAuthUserRouting(UserHanlder)
-	InitRoleRouting(RoleHandler)
+	// InitRoleRouting(RoleHandler)
 	InitTaskPriorityRouting(TaskPriorityHandler)
 	InitTaskStatusRouting(TaskStatusHandler)
 	InitProjectRouting(ProjectHandler)
@@ -62,22 +62,23 @@ func (r *routing) InitAuthUserRouting(userHandler UserHanlder) {
 
 }
 
+// 現状使わない
 // InitRoleRouting Roleのルーティング
-func (r *routing) InitRoleRouting(roleHandler RoleHandler) {
-	base := r.e.Group("/api/role")
-	jwt := base.Group("", middleware.AuthMiddleware(r.auth, r.token))
+// func (r *routing) InitRoleRouting(roleHandler RoleHandler) {
+// 	base := r.e.Group("/api/role")
+// 	jwt := base.Group("", middleware.AuthMiddleware(r.auth, r.token))
 
-	// 全て取得
-	jwt.GET("", roleHandler.Get())
-	// 詳細取得
-	jwt.GET("/:id", roleHandler.GetDetail())
-	// 登録
-	jwt.POST("", roleHandler.Create())
-	// 更新
-	jwt.PUT("/:id", roleHandler.Update())
-	// 削除
-	jwt.DELETE("/:id", roleHandler.Delete())
-}
+// 	// 全て取得
+// 	jwt.GET("", roleHandler.Get())
+// 	// 詳細取得
+// 	jwt.GET("/:id", roleHandler.GetDetail())
+// 	// 登録
+// 	jwt.POST("", roleHandler.Create())
+// 	// 更新
+// 	jwt.PUT("/:id", roleHandler.Update())
+// 	// 削除
+// 	jwt.DELETE("/:id", roleHandler.Delete())
+// }
 
 // InitTaskPriorityRouting ルーティング
 func (r *routing) InitTaskPriorityRouting(taskPriorityHandler TaskPriorityHandler) {

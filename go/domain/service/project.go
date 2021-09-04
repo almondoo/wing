@@ -31,7 +31,8 @@ func (rs *projectService) GetDetail(id uint32) (*entity.Project, error) {
 
 func (rs *projectService) Create(request *validation.ProjectRequest) error {
 	project := &entity.Project{
-		Name: request.Name,
+		Name:    request.Name,
+		Content: request.Content,
 	}
 	_, err := rs.projectRepo.Create(project)
 	return err
@@ -43,6 +44,8 @@ func (rs *projectService) Update(id uint32, request *validation.ProjectRequest) 
 	if err != nil {
 		return
 	}
+	project.Name = request.Name
+	project.Content = request.Content
 	_, err = rs.projectRepo.Update(project)
 	return
 }

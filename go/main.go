@@ -45,6 +45,9 @@ func main() {
 		panic(err)
 	}
 	defer repositories.Close()
+	if err := repositories.Migrations(); err != nil {
+		panic(err)
+	}
 	if os.Getenv("ENV") == "local" {
 		repositories.Seeder()
 	}
@@ -53,6 +56,9 @@ func main() {
 	token := auth.NewToken()
 	group := e.Group("")
 	routing := handler.NewRouting(group, newAuth, token)
+
+	utilService := service.NewUtilService(repositories.User, repositories.Role)
+	utilUsecase := usecase.NewUtilUsecase(utilService)
 
 	// 共通Routing
 	routing.InitCommonRouting()
@@ -63,16 +69,17 @@ func main() {
 	userHandler := handler.NewUserHandler(userUsecase)
 	routing.InitAuthUserRouting(userHandler)
 
+	// 現状使わないかも
 	// Role関連のRouting
-	roleService := service.NewRoleService(repositories.Role)
-	roleUsecase := usecase.NewRoleUsecase(roleService)
-	roleHandler := handler.NewRoleHandler(roleUsecase)
-	routing.InitRoleRouting(roleHandler)
+	// roleService := service.NewRoleService(repositories.Role)
+	// roleUsecase := usecase.NewRoleUsecase(roleService)
+	// roleHandler := handler.NewRoleHandler(roleUsecase)
+	// routing.InitRoleRouting(roleHandler)
 
 	// Role関連のRouting
 	taskPriorityService := service.NewTaskPriorityService(repositories.TaskPriority)
 	taskPriorityUsecase := usecase.NewTaskPriorityUsecase(taskPriorityService)
-	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase)
+	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase, utilUsecase)
 	routing.InitTaskPriorityRouting(taskPriorityHandler)
 
 	// Role関連のRouting

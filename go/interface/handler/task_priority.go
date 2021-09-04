@@ -22,11 +22,12 @@ type TaskPriorityHandler interface {
 // taskPriorityHandler 依存関係
 type taskPriorityHandler struct {
 	tpu usecase.TaskPriorityUsecase
+	uu  usecase.UtilUsecase
 }
 
 // NewTaskPriorityHandler 新しくTaskPriorityのハンドラーを作成する。
-func NewTaskPriorityHandler(tpu usecase.TaskPriorityUsecase) TaskPriorityHandler {
-	return &taskPriorityHandler{tpu: tpu}
+func NewTaskPriorityHandler(tpu usecase.TaskPriorityUsecase, uu usecase.UtilUsecase) TaskPriorityHandler {
+	return &taskPriorityHandler{tpu: tpu, uu: uu}
 }
 
 // Get taskPriority全て取得

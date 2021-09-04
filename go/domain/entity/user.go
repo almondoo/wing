@@ -3,21 +3,19 @@ package entity
 import (
 	"errors"
 	"time"
-	"wing/interface/validation"
 
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID              uint       `json:"id"`
-	RoleID          uint       `json:"role_id"`
-	Role            *Role      `json:"role"`
-	Name            string     `json:"name" gorm:"size:100;not null" validate:"required,max=100"`
-	Email           string     `json:"email" gorm:"size:255;not null;unique" validate:"required,max=255"`
-	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`
-	Password        string     `json:"-" gorm:"size:255;not null" validate:"required,max=255"`
-	CreatedAt       time.Time  `json:"createdAt" gorm:"not null"`
-	UpdatedAt       time.Time  `json:"updatedAt" gorm:"not null"`
+	ID              uint           `json:"id"`
+	Name            string         `json:"name" gorm:"size:100;not null"`
+	Email           string         `json:"email" gorm:"size:255;not null;unique"`
+	EmailVerifiedAt *time.Time     `json:"emailVerifiedAt"`
+	Password        string         `json:"-" gorm:"size:255;not null"`
+	CreatedAt       time.Time      `json:"createdAt" gorm:"not null"`
+	UpdatedAt       time.Time      `json:"updatedAt" gorm:"not null"`
+	UserHaveRole    []UserHaveRole `json:"userHaveRole"`
 }
 
 func (u *User) TableName() string {
@@ -25,11 +23,6 @@ func (u *User) TableName() string {
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {
-	v := validation.DBValidatorInit()
-	err = v.Validate(u)
-	if err != nil {
-		return err
-	}
 	if ok := u.isExistsEmail(tx); ok {
 		return errors.New("emailが既に存在しています。")
 	}

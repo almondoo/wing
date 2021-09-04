@@ -11,7 +11,8 @@ Messageのsuffixはバリデーションにかかった内容を返す
 
 // 共通処理
 type ProjectRequest struct {
-	Name string `json:"name" form:"name" validate:"required,max=30"`
+	Name    string `json:"name" form:"name" validate:"required,max=255"`
+	Content string `json:"content" from:"content" validate:"required,max=20000"`
 }
 
 func ProjectMessage(err error) map[string]string {
@@ -28,6 +29,13 @@ func ProjectMessage(err error) map[string]string {
 					errorMessages["name"] = "必須項目です。"
 				case "max":
 					errorMessages["name"] = "30文字以内で入力してください。"
+				}
+			case "Content":
+				switch tag {
+				case "required":
+					errorMessages["content"] = "必須項目です。"
+				case "max":
+					errorMessages["content"] = "20000文字以内で入力してください。"
 				}
 			}
 		}

@@ -34,6 +34,14 @@ func (rr *roleRepository) Finds() ([]*entity.Role, error) {
 	return roles, nil
 }
 
+func (rr *roleRepository) FindByConditions(conditions map[string]interface{}) (*entity.Role, error) {
+	var role *entity.Role
+	if err := rr.Conn.Where(conditions).Find(&role).Error; err != nil {
+		return nil, err
+	}
+	return role, nil
+}
+
 // Create 作成
 func (rr *roleRepository) Create(role *entity.Role) (*entity.Role, error) {
 	tx := rr.Conn.Begin()

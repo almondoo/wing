@@ -9,6 +9,7 @@ import (
 )
 
 type UserService interface {
+	Find(id uint) (*entity.User, error)
 	Login(*validation.UserLoginRequest) (*entity.User, error)
 	Register(*validation.UserRegisterRequest) (*entity.User, error)
 	Logout(*auth.TokenData) error
@@ -23,6 +24,10 @@ type userService struct {
 
 func NewUserService(userRepo repository.UserRepository, auth auth.AuthInterface, token auth.TokenInterface) UserService {
 	return &userService{userRepo: userRepo, auth: auth, token: token}
+}
+
+func (us *userService) Find(id uint) (*entity.User, error) {
+	return us.userRepo.FindByID(id)
 }
 
 func (us *userService) Login(request *validation.UserLoginRequest) (*entity.User, error) {
@@ -45,7 +50,7 @@ func (us *userService) Register(request *validation.UserRegisterRequest) (*entit
 	}
 
 	user := &entity.User{
-		RoleID:   20,
+		// RoleID:   20,
 		Name:     request.Name,
 		Email:    request.Email,
 		Password: password,

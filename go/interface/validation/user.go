@@ -130,3 +130,68 @@ func UserEditMessage(err error) map[string]string {
 
 	return nil
 }
+
+// UserEditPasswordRequest パスワード修正バリデーター
+type UserEditPasswordRequest struct {
+	Password        string `json:"password" form:"password" validate:"required,min=8"`
+	PasswordConfirm string `json:"password_confirm" form:"password_confirm" validate:"required,eqfield=Password"`
+}
+
+// UserEditPasswordMessage パスワードバリデーターメッセージ
+func UserEditPasswordMessage(err error) map[string]string {
+	var errorMessages = make(map[string]string)
+	errors := err.(validator.ValidationErrors)
+	if len(errors) != 0 {
+		for i := range errors {
+			tag := errors[i].Tag()
+
+			switch errors[i].StructField() {
+			case "Password":
+				switch tag {
+				case "required":
+					errorMessages["password"] = "必須項目です。"
+				}
+
+			case "PasswordConfirm":
+				switch tag {
+				case "required":
+					errorMessages["password_confirm"] = "必須項目です。"
+				case "eqfield":
+					errorMessages["password_confirm"] = "パスワードと同じ値を入力してください。"
+				}
+			}
+		}
+		return errorMessages
+	}
+
+	return nil
+}
+
+// UserEditRoleRequest ユーザーの権限を編集する
+type UserEditRoleRequest struct {
+	RoleID uint `json:"role_id" form:"role_id" validate:"required,numeric"`
+}
+
+// UserEditRoleMessage ユーザーの権限バリデーターメッセージ
+func UserEditRoleMessage(err error) map[string]string {
+	var errorMessages = make(map[string]string)
+	errors := err.(validator.ValidationErrors)
+	if len(errors) != 0 {
+		for i := range errors {
+			tag := errors[i].Tag()
+
+			switch errors[i].StructField() {
+			case "RoleID":
+				switch tag {
+				case "required":
+					errorMessages["password"] = "必須項目です。"
+				case "numeric":
+					errorMessages["numeric"] = "数字で入力してください。"
+				}
+			}
+		}
+		return errorMessages
+	}
+
+	return nil
+}

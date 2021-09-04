@@ -1,20 +1,28 @@
-# タスク管理システム OSS  
+# タスク管理システム OSS
 
-## 開発環境手順  
+## 初期開発環境手順
+
 1. make start-up
 2. make n-bash
-3. npm i  
+3. npm i
 4. npm run dev
 
-## 技術スタック  
+次回から
+
+1. make up
+2. make n-bash
+3. npm run dev
+
+## 技術スタック
+
 React 17.0.2  
 Next 11.0.1  
-SWR 0.5.6  
+SWR 0.5.6
 
-Go 1.5  
-echo 4系  
+Go 1.17  
+echo 4 系
 
-## ディレクトリ構造  
+## ディレクトリ構造
 
 ```
 ├── src
@@ -42,76 +50,74 @@ echo 4系
 │   └── utils 他に必要なもの
 ```
 
-  
-# Go 基本ルールまとめ  
+# Go 基本ルールまとめ
 
-## Response  
+## Response
 
-| String | 内容 | 返り値 |
-| --- | --- | --- |
-| data | クライアントに送りたいデータ | データ |
-| status | 成功か失敗か | ok or ng |
-| token | もしAccessTokenが無効でRefreshTokenで認証した時に返す値 | token or null |
-
-
+| String | 内容                         | 返り値   |
+| ------ | ---------------------------- | -------- |
+| data   | クライアントに送りたいデータ | データ   |
+| status | 成功か失敗か                 | ok or ng |
 
 ```go
 {
   "data": {
-    interface
+    interface{}{
+
+    }
   },
-  "status": code < 300 ok else ng, 
+  "status": code < 300 ok else ng,
 }
-or
-null
 ```
 
 ## 依存関係
+
 router  
-↓  
+↓ ↑  
 Handler  
-↓  
+↓ ↑  
 usecase  
-↓  
+↓ ↑  
 service  
-↓  
-repository  
+↓ ↑  
+repository
 
-
-## ディレクトリ構成  
-
+## ディレクトリ構成
 
 ```
 go
 ├── application
+│   ├── format  整形する
 │   └── usecase ユースケース
 │
 ├── db
+│   ├── seed     サンプルデータの流し込み
 │   └── mysql.go DB接続系
 │
 ├── domain
-│   ├── entity テーブル構成
+│   ├── model      型定義
+│   ├── entity     テーブル構成
 │   ├── repositoty リポジトリ
-│   └── service ビジネスロジック
+│   └── service    ビジネスロジック
 │
 ├── infrastructure
-│   ├── auth 認証系
-│   ├── cookie クッキー操作
+│   ├── auth        認証系
+│   ├── cookie      クッキー操作
 │   ├── persistence リポジトリビジネスロジック
-│   ├── security セキュリティー
-│   └── storedb KVS系
+│   ├── security    セキュリティー
+│   └── storedb     KVS系
 │
 ├── interface
-│   ├── context 認証系
+│   ├── context    抽象化されたデータ構造
 │   ├── fileupload ファイル操作
-│   ├── handler コントローラー 
+│   ├── handler    コントローラー
 │   ├── middleware ミドルウェア
-│   ├── response カスタムレスポンス
+│   ├── response   カスタムレスポンス
 │   └── validation バリデーション
 │
-└── main.go 
+└── main.go
 ```
 
 # License
-MITライセンスの下で配布されています。  
-詳細については、コード内のLICENSEファイルを参照してください。  
+
+Distributed under MIT License, please see license file within the code for more details.

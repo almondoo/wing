@@ -3,14 +3,13 @@ package entity
 import (
 	"errors"
 	"time"
-	"wing/interface/validation"
 
 	"gorm.io/gorm"
 )
 
 type TaskChild struct {
 	ID             uint          `json:"id"`
-	TaskID         uint          `json:"taskId" gorm:"not null" validate:"required"`
+	TaskID         uint          `json:"taskId" gorm:"not null"`
 	Task           *Task         `json:"task"`
 	CreateUserID   uint          `json:"create_user_id"`
 	CreateUser     *User         `json:"createUser"`
@@ -33,10 +32,6 @@ func (tc *TaskChild) TableName() string {
 }
 
 func (tc *TaskChild) BeforeSave(tx *gorm.DB) error {
-	v := validation.DBValidatorInit()
-	if err := v.Validate(tc); err != nil {
-		return err
-	}
 	if ok := tc.isExistsTask(tx); !ok {
 		return errors.New("親タスクが存在しません。")
 	}

@@ -13,6 +13,7 @@ type CustomValidator struct {
 // NewValidator
 func NewValidator() echo.Validator {
 	validate := validator.New()
+	// validate.RegisterValidation("is_japan",isJapan) // カスタムバリデーターを追加
 	return &CustomValidator{validator: validate}
 }
 
@@ -20,3 +21,12 @@ func NewValidator() echo.Validator {
 func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
+
+// カスタムバリデーター
+// func isJapan(fl validator.FieldLevel) bool {  //引数の型、返り値は固定
+//     birthPlace := fl.Field().String()
+//     if birthPlace == "Japan" {
+//         return true
+//     }
+//     return false
+// }

@@ -14,22 +14,49 @@ func NewRoleSeeder(db *gorm.DB) *roleSeeder {
 	return &roleSeeder{conn: db}
 }
 
+// 開発者(developer) or オーナー(owner) or 管理者(administrator):全ての権限
+// 編集者(editor):作成,更新,参照権限
+// 閲覧者(viewer):参照権限
 func (rs *roleSeeder) Seeder() {
 	rs.create(entity.Role{
-		ID:   1,
-		Name: "開発者",
+		ID:    1,
+		Name:  "organization",
+		Actor: "developer",
 	})
 	rs.create(entity.Role{
-		ID:   5,
-		Name: "統括者",
+		ID:    2,
+		Name:  "organization",
+		Actor: "owner",
 	})
 	rs.create(entity.Role{
-		ID:   10,
-		Name: "管理者",
+		ID:    3,
+		Name:  "organization",
+		Actor: "administrator",
 	})
 	rs.create(entity.Role{
-		ID:   20,
-		Name: "閲覧者",
+		ID:    4,
+		Name:  "organization",
+		Actor: "editor",
+	})
+	rs.create(entity.Role{
+		ID:    5,
+		Name:  "organization",
+		Actor: "viewer",
+	})
+	rs.create(entity.Role{
+		ID:    6,
+		Name:  "task_manage",
+		Actor: "administrator",
+	})
+	rs.create(entity.Role{
+		ID:    7,
+		Name:  "task_manage",
+		Actor: "editor",
+	})
+	rs.create(entity.Role{
+		ID:    8,
+		Name:  "task_manage",
+		Actor: "viewer",
 	})
 }
 

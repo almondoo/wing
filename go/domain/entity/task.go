@@ -3,14 +3,13 @@ package entity
 import (
 	"errors"
 	"time"
-	"wing/interface/validation"
 
 	"gorm.io/gorm"
 )
 
 type Task struct {
 	ID             uint          `json:"id"`
-	ProjectID      uint32        `json:"projectId" gorm:"not null" validate:"required"`
+	ProjectID      uint32        `json:"projectId" gorm:"not null"`
 	Project        *Project      `json:"project"`
 	CreateUserID   uint          `json:"create_user_id"`
 	CreateUser     *User         `json:"createUser"`
@@ -34,10 +33,6 @@ func (t *Task) TableName() string {
 }
 
 func (t *Task) BeforeSave(tx *gorm.DB) error {
-	v := validation.DBValidatorInit()
-	if err := v.Validate(t); err != nil {
-		return err
-	}
 	if ok := t.isExistsProject(tx); !ok {
 		return errors.New("プロジェクトが存在しません。")
 	}

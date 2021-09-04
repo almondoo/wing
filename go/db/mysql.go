@@ -22,6 +22,7 @@ type Repositories struct {
 	Project      repository.ProjectRepository
 	Task         repository.TaskRepository
 	TaskChild    repository.TaskChildRepository
+	UserHaveRole repository.UserHaveRoleRepository
 	DB           *gorm.DB
 }
 
@@ -44,9 +45,6 @@ func InitDB() (*Repositories, error) {
 		return nil, err
 	}
 
-	// 自動的にテーブルを生成する
-	db.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.Project{}, &entity.Task{}, &entity.TaskChild{}, &entity.TaskStatus{}, &entity.TaskPriority{})
-
 	return &Repositories{
 		User:         persistence.NewUserRepository(db),
 		Role:         persistence.NewRoleRepository(db),
@@ -55,6 +53,7 @@ func InitDB() (*Repositories, error) {
 		Project:      persistence.NewProjectRepository(db),
 		Task:         persistence.NewTaskRepository(db),
 		TaskChild:    persistence.NewTaskChildRepository(db),
+		UserHaveRole: persistence.NewUserHaveRoleRepository(db),
 		DB:           db,
 	}, nil
 
@@ -73,9 +72,23 @@ func (r *Repositories) Seeder() {
 	db := r.DB
 	seed.NewRoleSeeder(db).Seeder()
 	seed.NewUserSeeder(db).Seeder()
+	seed.NewUserHaveRoleSeeder(db).Seeder()
 	seed.NewTaskStatusSeeder(db).Seeder()
 	seed.NewTaskPrioritySeeder(db).Seeder()
 	seed.NewProjectSeeder(db).Seeder()
 	seed.NewTaskSeeder(db).Seeder()
 	seed.NewTaskChildSeeder(db).Seeder()
+}
+
+func (r *Repositories) Migrations() error {
+	// 自動的にテーブルを生成する
+	if err := r.DB.AutoMigrate(&entity.Role{}, &entity.User{}, &entity.UserHaveRole{}, &entity.Project{}, &entity.Task{}, &entity.TaskChild{}, &entity.TaskStatus{}, &entity.TaskPriority{}); err != nil {
+		return err
+	}
+
+	if err := r.migrate20210831(); err != nil {
+		return err
+	}
+
+	return nil
 }
