@@ -22,24 +22,31 @@ func (us *userSeeder) Seeder() {
 	}
 
 	us.create(entity.User{
-		ID: 1,
-		// RoleID:   1,
+		ID:       1,
+		RoleID:   1,
 		Name:     "test1",
 		Email:    "user1@example.com",
 		Password: pass,
 	})
 	us.create(entity.User{
-		ID: 2,
-		// RoleID:   1,
+		ID:       2,
+		RoleID:   2,
 		Name:     "test2",
 		Email:    "user2@example.com",
 		Password: pass,
 	})
 	us.create(entity.User{
-		ID: 3,
-		// RoleID:   1,
+		ID:       3,
+		RoleID:   3,
 		Name:     "test3",
 		Email:    "user3@example.com",
+		Password: pass,
+	})
+	us.create(entity.User{
+		ID:       4,
+		RoleID:   4,
+		Name:     "test4",
+		Email:    "user4@example.com",
 		Password: pass,
 	})
 }

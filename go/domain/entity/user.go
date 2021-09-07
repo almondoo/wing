@@ -8,14 +8,15 @@ import (
 )
 
 type User struct {
-	ID              uint           `json:"id"`
-	Name            string         `json:"name" gorm:"size:100;not null"`
-	Email           string         `json:"email" gorm:"size:255;not null;unique"`
-	EmailVerifiedAt *time.Time     `json:"emailVerifiedAt"`
-	Password        string         `json:"-" gorm:"size:255;not null"`
-	CreatedAt       time.Time      `json:"createdAt" gorm:"not null"`
-	UpdatedAt       time.Time      `json:"updatedAt" gorm:"not null"`
-	UserHaveRole    []UserHaveRole `json:"userHaveRole"`
+	ID              uint `json:"id"`
+	Role            *Role
+	RoleID          uint32     `json:"roleId" gorm:"not null"`
+	Name            string     `json:"name" gorm:"size:100;not null"`
+	Email           string     `json:"email" gorm:"size:255;not null;unique"`
+	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`
+	Password        string     `json:"-" gorm:"size:255;not null"`
+	CreatedAt       time.Time  `json:"createdAt" gorm:"not null"`
+	UpdatedAt       time.Time  `json:"updatedAt" gorm:"not null"`
 }
 
 func (u *User) TableName() string {

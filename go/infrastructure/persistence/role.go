@@ -16,7 +16,7 @@ func NewRoleRepository(conn *gorm.DB) repository.RoleRepository {
 }
 
 // IDで取得
-func (rr *roleRepository) FindByID(id uint) (*entity.Role, error) {
+func (rr *roleRepository) FindByID(id uint32) (*entity.Role, error) {
 	role := &entity.Role{ID: id}
 
 	if err := rr.Conn.First(&role).Error; err != nil {
@@ -85,7 +85,7 @@ func (rr *roleRepository) Update(role *entity.Role) (*entity.Role, error) {
 }
 
 // Delete 削除
-func (rr *roleRepository) Delete(id uint) error {
+func (rr *roleRepository) Delete(id uint32) error {
 	tx := rr.Conn.Begin()
 	defer func() {
 		if r := recover(); r != nil {

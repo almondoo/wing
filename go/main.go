@@ -57,52 +57,55 @@ func main() {
 	group := e.Group("")
 	routing := handler.NewRouting(group, newAuth, token)
 
+	// service作成
 	utilService := service.NewUtilService(repositories.User, repositories.Role)
+	userService := service.NewUserService(repositories.User, newAuth, token)
+	roleService := service.NewRoleService(repositories.Role)
+	taskPriorityService := service.NewTaskPriorityService(repositories.TaskPriority)
+	taskStatusService := service.NewTaskStatusService(repositories.TaskStatus)
+	projectService := service.NewProjectService(repositories.Project)
+	taskService := service.NewTaskService(repositories.Task)
+	taskChildService := service.NewTaskChildService(repositories.TaskChild)
+
+	// usecase作成
 	utilUsecase := usecase.NewUtilUsecase(utilService)
+	userUsecase := usecase.NewUserUsecase(userService, newAuth, token)
+	roleUsecase := usecase.NewRoleUsecase(roleService, userService)
+	taskPriorityUsecase := usecase.NewTaskPriorityUsecase(taskPriorityService)
+	taskStatusUsecase := usecase.NewTaskStatusUsecase(taskStatusService)
+	projectUsecase := usecase.NewProjectUsecase(projectService)
+	taskUsecase := usecase.NewTaskUsecase(taskService)
+	taskChildUsecase := usecase.NewTaskChildUsecase(taskChildService)
 
 	// 共通Routing
 	routing.InitCommonRouting()
 
 	// User関連のRouting
-	userService := service.NewUserService(repositories.User, newAuth, token)
-	userUsecase := usecase.NewUserUsecase(userService, newAuth, token)
 	userHandler := handler.NewUserHandler(userUsecase)
 	routing.InitAuthUserRouting(userHandler)
 
 	// 現状使わないかも
 	// Role関連のRouting
-	// roleService := service.NewRoleService(repositories.Role)
-	// roleUsecase := usecase.NewRoleUsecase(roleService)
 	// roleHandler := handler.NewRoleHandler(roleUsecase)
 	// routing.InitRoleRouting(roleHandler)
 
 	// Role関連のRouting
-	taskPriorityService := service.NewTaskPriorityService(repositories.TaskPriority)
-	taskPriorityUsecase := usecase.NewTaskPriorityUsecase(taskPriorityService)
 	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase, utilUsecase)
 	routing.InitTaskPriorityRouting(taskPriorityHandler)
 
 	// Role関連のRouting
-	taskStatusService := service.NewTaskStatusService(repositories.TaskStatus)
-	taskStatusUsecase := usecase.NewTaskStatusUsecase(taskStatusService)
 	taskStatusHandler := handler.NewTaskStatusHandler(taskStatusUsecase)
 	routing.InitTaskStatusRouting(taskStatusHandler)
 
 	// Role関連のRouting
-	projectService := service.NewProjectService(repositories.Project)
-	projectUsecase := usecase.NewProjectUsecase(projectService)
-	projectHandler := handler.NewProjectHandler(projectUsecase)
+	projectHandler := handler.NewProjectHandler(projectUsecase, roleUsecase)
 	routing.InitProjectRouting(projectHandler)
 
 	// Role関連のRouting
-	taskService := service.NewTaskService(repositories.Task)
-	taskUsecase := usecase.NewTaskUsecase(taskService)
 	taskHandler := handler.NewTaskHandler(taskUsecase)
 	routing.InitTaskRouting(taskHandler)
 
 	// Role関連のRouting
-	taskChildService := service.NewTaskChildService(repositories.TaskChild)
-	taskChildUsecase := usecase.NewTaskChildUsecase(taskChildService)
 	taskChildHandler := handler.NewTaskChildHandler(taskChildUsecase)
 	routing.InitTaskChildRouting(taskChildHandler)
 

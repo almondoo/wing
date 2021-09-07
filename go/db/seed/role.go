@@ -19,44 +19,20 @@ func NewRoleSeeder(db *gorm.DB) *roleSeeder {
 // 閲覧者(viewer):参照権限
 func (rs *roleSeeder) Seeder() {
 	rs.create(entity.Role{
-		ID:    1,
-		Name:  "organization",
-		Actor: "developer",
+		ID:   1,
+		Name: "developer",
 	})
 	rs.create(entity.Role{
-		ID:    2,
-		Name:  "organization",
-		Actor: "owner",
+		ID:   2,
+		Name: "administrator",
 	})
 	rs.create(entity.Role{
-		ID:    3,
-		Name:  "organization",
-		Actor: "administrator",
+		ID:   3,
+		Name: "editor",
 	})
 	rs.create(entity.Role{
-		ID:    4,
-		Name:  "organization",
-		Actor: "editor",
-	})
-	rs.create(entity.Role{
-		ID:    5,
-		Name:  "organization",
-		Actor: "viewer",
-	})
-	rs.create(entity.Role{
-		ID:    6,
-		Name:  "task_manage",
-		Actor: "administrator",
-	})
-	rs.create(entity.Role{
-		ID:    7,
-		Name:  "task_manage",
-		Actor: "editor",
-	})
-	rs.create(entity.Role{
-		ID:    8,
-		Name:  "task_manage",
-		Actor: "viewer",
+		ID:   4,
+		Name: "viewer",
 	})
 }
 

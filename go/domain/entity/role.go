@@ -7,10 +7,9 @@ import (
 )
 
 type Role struct {
-	ID           uint           `json:"id"`
-	Name         string         `json:"name" gorm:"size:30;not null"`
-	Actor        string         `json:"actor" gorm:"size:30;not null"`
-	UserHaveRole []UserHaveRole `json:"userHaveRole"`
+	ID   uint32 `json:"id"`
+	Name string `json:"name" gorm:"size:30;not null;unique"`
+	User []User
 }
 
 func (r *Role) TableName() string {
@@ -26,7 +25,7 @@ func (r *Role) BeforeSave(tx *gorm.DB) (err error) {
 
 func (r *Role) isExistsRecord(tx *gorm.DB) bool {
 	role := &Role{}
-	if err := tx.Where("name = ? AND actor = ?", r.Name, r.Actor).First(role).Error; err != nil {
+	if err := tx.Where("name = ?", r.Name).First(role).Error; err != nil {
 		return false
 	}
 	return true

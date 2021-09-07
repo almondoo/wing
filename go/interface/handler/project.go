@@ -7,6 +7,7 @@ import (
 	"wing/application/usecase"
 	"wing/interface/context"
 	"wing/interface/validation"
+	"wing/utils/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,16 +23,22 @@ type ProjectHandler interface {
 // projectHandler 依存関係
 type projectHandler struct {
 	pu usecase.ProjectUsecase
+	ru usecase.RoleUsecase
 }
 
 // NewProjectHandler 新しくProjectのハンドラーを作成する。
-func NewProjectHandler(pu usecase.ProjectUsecase) ProjectHandler {
-	return &projectHandler{pu: pu}
+func NewProjectHandler(pu usecase.ProjectUsecase, ru usecase.RoleUsecase) ProjectHandler {
+	return &projectHandler{pu: pu, ru: ru}
 }
 
 // Get task status全て取得
 func (ph *projectHandler) Get() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
+			return c.CustomResponse(http.StatusMethodNotAllowed, map[string]interface{}{
+				"message": "権限がありません。",
+			})
+		}
 		projects, err := ph.pu.Get()
 		if err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())
@@ -57,6 +64,11 @@ func (ph *projectHandler) GetDetail() echo.HandlerFunc {
 // Create 作成
 func (ph *projectHandler) Create() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
+			return c.CustomResponse(http.StatusMethodNotAllowed, map[string]interface{}{
+				"message": "権限がありません。",
+			})
+		}
 		request := &validation.ProjectRequest{}
 		if ok, message := c.BindValidate(request, validation.ProjectMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)

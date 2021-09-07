@@ -102,8 +102,8 @@ func (rh *roleHandler) Delete() echo.HandlerFunc {
 }
 
 // getParamID URLからidを取得する
-func (rh *roleHandler) getParamID(c *context.CustomContext) uint {
+func (rh *roleHandler) getParamID(c *context.CustomContext) uint32 {
 	tmpId, _ := strconv.Atoi(c.Param("id"))
-	id := uint(tmpId)
+	id := uint32(tmpId)
 	return id
 }
