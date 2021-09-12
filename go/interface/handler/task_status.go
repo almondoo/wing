@@ -7,6 +7,7 @@ import (
 	"wing/application/usecase"
 	"wing/interface/context"
 	"wing/interface/validation"
+	"wing/utils/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,16 +23,20 @@ type TaskStatusHandler interface {
 // taskStatusHandler 依存関係
 type taskStatusHandler struct {
 	tsu usecase.TaskStatusUsecase
+	ru  usecase.RoleUsecase
 }
 
 // NewTaskStatusHandler 新しくTaskStatusのハンドラーを作成する。
-func NewTaskStatusHandler(tsu usecase.TaskStatusUsecase) TaskStatusHandler {
-	return &taskStatusHandler{tsu: tsu}
+func NewTaskStatusHandler(tsu usecase.TaskStatusUsecase, ru usecase.RoleUsecase) TaskStatusHandler {
+	return &taskStatusHandler{tsu: tsu, ru: ru}
 }
 
 // Get task status全て取得
 func (tsh *taskStatusHandler) Get() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tsh.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		taskStatuses, err := tsh.tsu.Get()
 		if err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())
@@ -44,6 +49,9 @@ func (tsh *taskStatusHandler) Get() echo.HandlerFunc {
 // GetDetail 詳細取得
 func (tsh *taskStatusHandler) GetDetail() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tsh.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := tsh.getParamID(c)
 		taskStatus, err := tsh.tsu.GetDetail(id)
 		if err != nil {
@@ -57,6 +65,9 @@ func (tsh *taskStatusHandler) GetDetail() echo.HandlerFunc {
 // Create 作成
 func (tsh *taskStatusHandler) Create() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tsh.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskStatusRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskStatusMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -73,6 +84,9 @@ func (tsh *taskStatusHandler) Create() echo.HandlerFunc {
 // Update 更新
 func (tsh *taskStatusHandler) Update() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tsh.ru.HasRole(c.GetAuthorID(), constant.UpdateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskStatusRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskStatusMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -90,6 +104,9 @@ func (tsh *taskStatusHandler) Update() echo.HandlerFunc {
 // Delete 削除
 func (tsh *taskStatusHandler) Delete() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tsh.ru.HasRole(c.GetAuthorID(), constant.DeleteOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := tsh.getParamID(c)
 		if err := tsh.tsu.Delete(id); err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())

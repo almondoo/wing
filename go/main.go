@@ -58,7 +58,6 @@ func main() {
 	routing := handler.NewRouting(group, newAuth, token)
 
 	// service作成
-	utilService := service.NewUtilService(repositories.User, repositories.Role)
 	userService := service.NewUserService(repositories.User, newAuth, token)
 	roleService := service.NewRoleService(repositories.Role)
 	taskPriorityService := service.NewTaskPriorityService(repositories.TaskPriority)
@@ -68,8 +67,7 @@ func main() {
 	taskChildService := service.NewTaskChildService(repositories.TaskChild)
 
 	// usecase作成
-	utilUsecase := usecase.NewUtilUsecase(utilService)
-	userUsecase := usecase.NewUserUsecase(userService, newAuth, token)
+	userUsecase := usecase.NewUserUsecase(userService, roleService, newAuth, token)
 	roleUsecase := usecase.NewRoleUsecase(roleService, userService)
 	taskPriorityUsecase := usecase.NewTaskPriorityUsecase(taskPriorityService)
 	taskStatusUsecase := usecase.NewTaskStatusUsecase(taskStatusService)
@@ -77,24 +75,24 @@ func main() {
 	taskUsecase := usecase.NewTaskUsecase(taskService)
 	taskChildUsecase := usecase.NewTaskChildUsecase(taskChildService)
 
+	// 現状使わないかも
+	// Role関連のRouting
+	// roleHandler := handler.NewRoleHandler(roleUsecase, roleUsecase)
+	// routing.InitRoleRouting(roleHandler)
+
 	// 共通Routing
 	routing.InitCommonRouting()
 
 	// User関連のRouting
-	userHandler := handler.NewUserHandler(userUsecase)
+	userHandler := handler.NewUserHandler(userUsecase, roleUsecase)
 	routing.InitAuthUserRouting(userHandler)
 
-	// 現状使わないかも
 	// Role関連のRouting
-	// roleHandler := handler.NewRoleHandler(roleUsecase)
-	// routing.InitRoleRouting(roleHandler)
-
-	// Role関連のRouting
-	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase, utilUsecase)
+	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase, roleUsecase)
 	routing.InitTaskPriorityRouting(taskPriorityHandler)
 
 	// Role関連のRouting
-	taskStatusHandler := handler.NewTaskStatusHandler(taskStatusUsecase)
+	taskStatusHandler := handler.NewTaskStatusHandler(taskStatusUsecase, roleUsecase)
 	routing.InitTaskStatusRouting(taskStatusHandler)
 
 	// Role関連のRouting
@@ -102,11 +100,11 @@ func main() {
 	routing.InitProjectRouting(projectHandler)
 
 	// Role関連のRouting
-	taskHandler := handler.NewTaskHandler(taskUsecase)
+	taskHandler := handler.NewTaskHandler(taskUsecase, roleUsecase)
 	routing.InitTaskRouting(taskHandler)
 
 	// Role関連のRouting
-	taskChildHandler := handler.NewTaskChildHandler(taskChildUsecase)
+	taskChildHandler := handler.NewTaskChildHandler(taskChildUsecase, roleUsecase)
 	routing.InitTaskChildRouting(taskChildHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))

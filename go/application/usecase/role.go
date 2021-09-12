@@ -8,6 +8,7 @@ import (
 
 type RoleUsecase interface {
 	HasRole(userId uint, operation string) bool
+	IsAdmin(userId uint) bool
 	Get() ([]*entity.Role, error)
 	GetDetail(id uint32) (*entity.Role, error)
 	Create(*validation.RoleRequest) error
@@ -30,6 +31,14 @@ func (ru *roleUsecase) HasRole(userId uint, operation string) bool {
 		return false
 	}
 	return ru.rs.HasRole(user.RoleID, operation)
+}
+
+func (ru *roleUsecase) IsAdmin(userId uint) bool {
+	user, err := ru.us.Find(userId)
+	if err != nil {
+		return false
+	}
+	return ru.rs.IsAdmin(user.RoleID)
 }
 
 func (ru *roleUsecase) Get() ([]*entity.Role, error) {

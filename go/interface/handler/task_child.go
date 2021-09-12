@@ -7,6 +7,7 @@ import (
 	"wing/application/usecase"
 	"wing/interface/context"
 	"wing/interface/validation"
+	"wing/utils/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,17 +23,21 @@ type TaskChildHandler interface {
 // taskChildHandler 依存関係
 type taskChildHandler struct {
 	tcu usecase.TaskChildUsecase
+	ru  usecase.RoleUsecase
 }
 
 // NewTaskChildHandler 新しくTaskChildのハンドラーを作成する。
-func NewTaskChildHandler(tcu usecase.TaskChildUsecase) TaskChildHandler {
-	return &taskChildHandler{tcu: tcu}
+func NewTaskChildHandler(tcu usecase.TaskChildUsecase, ru usecase.RoleUsecase) TaskChildHandler {
+	return &taskChildHandler{tcu: tcu, ru: ru}
 }
 
 // Get task status全て取得
-func (tcu *taskChildHandler) Get() echo.HandlerFunc {
+func (tch *taskChildHandler) Get() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
-		taskChildren, err := tcu.tcu.Get()
+		if ok := tch.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
+		taskChildren, err := tch.tcu.Get()
 		if err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())
 		}
@@ -44,6 +49,9 @@ func (tcu *taskChildHandler) Get() echo.HandlerFunc {
 // GetDetail 詳細取得
 func (tch *taskChildHandler) GetDetail() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tch.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := tch.getParamID(c)
 		taskChild, err := tch.tcu.GetDetail(id)
 		if err != nil {
@@ -57,6 +65,9 @@ func (tch *taskChildHandler) GetDetail() echo.HandlerFunc {
 // Create 作成
 func (tch *taskChildHandler) Create() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tch.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskChildRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskChildMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -73,6 +84,9 @@ func (tch *taskChildHandler) Create() echo.HandlerFunc {
 // Update 更新
 func (tch *taskChildHandler) Update() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tch.ru.HasRole(c.GetAuthorID(), constant.UpdateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskChildRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskChildMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -90,6 +104,9 @@ func (tch *taskChildHandler) Update() echo.HandlerFunc {
 // Delete 削除
 func (tch *taskChildHandler) Delete() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tch.ru.HasRole(c.GetAuthorID(), constant.DeleteOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := tch.getParamID(c)
 		if err := tch.tcu.Delete(id); err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())

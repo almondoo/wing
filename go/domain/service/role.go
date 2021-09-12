@@ -10,6 +10,7 @@ import (
 
 type RoleService interface {
 	HasRole(roleId uint32, operation string) bool
+	IsAdmin(roleId uint32) bool
 	Get() ([]*entity.Role, error)
 	GetDetail(id uint32) (*entity.Role, error)
 	Create(*validation.RoleRequest) error
@@ -25,6 +26,7 @@ func NewRoleService(roleRepo repository.RoleRepository) RoleService {
 	return &roleService{roleRepo: roleRepo}
 }
 
+// HasRole メソッドの権限を持っているか
 func (rs *roleService) HasRole(roleId uint32, operation string) bool {
 	role, err := rs.roleRepo.FindByID(roleId)
 	if err != nil {
@@ -32,17 +34,29 @@ func (rs *roleService) HasRole(roleId uint32, operation string) bool {
 	}
 	switch operation {
 	case constant.GetOperation:
-		return array.IsArray(getVireActor(), role.Name)
+		return array.IsArray(getViewRole(), role.Name)
 
 	case constant.CreateOperation:
-		return array.IsArray(getCreateActor(), role.Name)
+		return array.IsArray(getCreateAndUpdateRole(), role.Name)
 
 	case constant.UpdateOperation:
-		return array.IsArray(getUpdateActor(), role.Name)
+		return array.IsArray(getCreateAndUpdateRole(), role.Name)
 
 	case constant.DeleteOperation:
-		return array.IsArray(getDeleteActor(), role.Name)
+		return array.IsArray(getDeleteRole(), role.Name)
 
+	}
+	return false
+}
+
+// IsAdmin 管理者以上の権限確認
+func (rs *roleService) IsAdmin(roleId uint32) bool {
+	role, err := rs.roleRepo.FindByID(roleId)
+	if err != nil {
+		return false
+	}
+	if array.IsArray(getAdminRole(), role.Name) {
+		return true
 	}
 	return false
 }
@@ -76,18 +90,22 @@ func (rs *roleService) Delete(id uint32) (err error) {
 	return rs.roleRepo.Delete(id)
 }
 
-func getVireActor() []interface{} {
+// getViewRole 閲覧権限を持っているロール
+func getViewRole() []interface{} {
 	return []interface{}{constant.Developer, constant.Administrator, constant.Editor, constant.Viewer}
 }
 
-func getCreateActor() []interface{} {
+// getCreateAndUpdateRole 作成・更新権限を持っているロール
+func getCreateAndUpdateRole() []interface{} {
 	return []interface{}{constant.Developer, constant.Administrator, constant.Editor}
 }
 
-func getUpdateActor() []interface{} {
-	return []interface{}{constant.Developer, constant.Administrator, constant.Editor}
+// getDeleteRole 削除権限を持っているロール
+func getDeleteRole() []interface{} {
+	return []interface{}{constant.Developer, constant.Administrator}
 }
 
-func getDeleteActor() []interface{} {
+// getViewRole 管理者権限以上を持っているロール
+func getAdminRole() []interface{} {
 	return []interface{}{constant.Developer, constant.Administrator}
 }

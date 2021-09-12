@@ -168,12 +168,13 @@ func UserEditPasswordMessage(err error) map[string]string {
 }
 
 // UserEditRoleRequest ユーザーの権限を編集する
-type UserEditRoleRequest struct {
-	RoleID uint `json:"role_id" form:"role_id" validate:"required,numeric"`
+type UserEditAssignRoleRequest struct {
+	UserID uint   `json:"user_id" form:"user_id" validate:"required,numeric"`
+	RoleID uint32 `json:"role_id" form:"role_id" validate:"required,numeric"`
 }
 
 // UserEditRoleMessage ユーザーの権限バリデーターメッセージ
-func UserEditRoleMessage(err error) map[string]string {
+func UserEditAssignRoleMessage(err error) map[string]string {
 	var errorMessages = make(map[string]string)
 	errors := err.(validator.ValidationErrors)
 	if len(errors) != 0 {
@@ -184,9 +185,9 @@ func UserEditRoleMessage(err error) map[string]string {
 			case "RoleID":
 				switch tag {
 				case "required":
-					errorMessages["password"] = "必須項目です。"
+					errorMessages["role_id"] = "必須項目です。"
 				case "numeric":
-					errorMessages["numeric"] = "数字で入力してください。"
+					errorMessages["role_id"] = "数字で入力してください。"
 				}
 			}
 		}

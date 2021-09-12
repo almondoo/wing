@@ -12,16 +12,18 @@ type UserUsecase interface {
 	Register(*validation.UserRegisterRequest) (*auth.TokenDetails, error)
 	Logout(*auth.TokenData) error
 	Edit(*validation.UserEditRequest, uint) (*entity.User, error)
+	EditAssignRole(*validation.UserEditAssignRoleRequest) error
 }
 
 type userUsecase struct {
 	us    service.UserService
+	rs    service.RoleService
 	auth  auth.AuthInterface
 	token auth.TokenInterface
 }
 
-func NewUserUsecase(us service.UserService, auth auth.AuthInterface, token auth.TokenInterface) UserUsecase {
-	return &userUsecase{us: us, auth: auth, token: token}
+func NewUserUsecase(us service.UserService, rs service.RoleService, auth auth.AuthInterface, token auth.TokenInterface) UserUsecase {
+	return &userUsecase{us: us, rs: rs, auth: auth, token: token}
 }
 
 func (uu *userUsecase) Login(request *validation.UserLoginRequest) (*auth.TokenDetails, error) {
@@ -57,6 +59,11 @@ func (uu *userUsecase) Edit(request *validation.UserEditRequest, userID uint) (*
 	}
 
 	return user, nil
+}
+
+func (uu *userUsecase) EditAssignRole(*validation.UserEditAssignRoleRequest) error {
+	// uu.us.Edit()
+	return nil
 }
 
 func (uu *userUsecase) createToken(id int) (*auth.TokenDetails, error) {

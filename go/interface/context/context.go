@@ -52,6 +52,12 @@ func (c *CustomContext) CustomResponse(code int, i interface{}) error {
 	return c.JSON(code, response)
 }
 
+func (c *CustomContext) HasNotRoleResponse() error {
+	return c.CustomResponse(http.StatusMethodNotAllowed, map[string]interface{}{
+		"message": "権限がありません。",
+	})
+}
+
 // Cookieを設置
 func (c *CustomContext) SetCookieToken(accessToken, refreshToken string) {
 	c.CreateCookie(constant.AccessTokenName, accessToken, time.Now().Add(auth.AccessExpires))

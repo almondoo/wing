@@ -55,6 +55,8 @@ func (r *routing) InitAuthUserRouting(userHandler UserHanlder) {
 	// ユーザー修正
 	jwt.PUT("", userHandler.Edit())
 
+	jwt.PUT("/role", userHandler.EditAssignRole())
+
 	// jwt認証確認
 	jwt.GET("/check", context.CastContext(func(c *context.CustomContext) error {
 		return c.CustomResponse(http.StatusOK, "jwt認証")

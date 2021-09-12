@@ -34,10 +34,8 @@ func NewProjectHandler(pu usecase.ProjectUsecase, ru usecase.RoleUsecase) Projec
 // Get task status全て取得
 func (ph *projectHandler) Get() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
-		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
-			return c.CustomResponse(http.StatusMethodNotAllowed, map[string]interface{}{
-				"message": "権限がありません。",
-			})
+		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
 		}
 		projects, err := ph.pu.Get()
 		if err != nil {
@@ -51,6 +49,9 @@ func (ph *projectHandler) Get() echo.HandlerFunc {
 // GetDetail 詳細取得
 func (ph *projectHandler) GetDetail() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := ph.getParamID(c)
 		project, err := ph.pu.GetDetail(id)
 		if err != nil {
@@ -65,9 +66,7 @@ func (ph *projectHandler) GetDetail() echo.HandlerFunc {
 func (ph *projectHandler) Create() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
 		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
-			return c.CustomResponse(http.StatusMethodNotAllowed, map[string]interface{}{
-				"message": "権限がありません。",
-			})
+			return c.HasNotRoleResponse()
 		}
 		request := &validation.ProjectRequest{}
 		if ok, message := c.BindValidate(request, validation.ProjectMessage); !ok {
@@ -85,6 +84,9 @@ func (ph *projectHandler) Create() echo.HandlerFunc {
 // Update 更新
 func (ph *projectHandler) Update() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.UpdateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.ProjectRequest{}
 		if ok, message := c.BindValidate(request, validation.ProjectMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -102,6 +104,9 @@ func (ph *projectHandler) Update() echo.HandlerFunc {
 // Delete 削除
 func (ph *projectHandler) Delete() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := ph.ru.HasRole(c.GetAuthorID(), constant.DeleteOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := ph.getParamID(c)
 		if err := ph.pu.Delete(id); err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())

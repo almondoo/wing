@@ -7,6 +7,7 @@ import (
 	"wing/application/usecase"
 	"wing/interface/context"
 	"wing/interface/validation"
+	"wing/utils/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,17 +23,20 @@ type TaskPriorityHandler interface {
 // taskPriorityHandler 依存関係
 type taskPriorityHandler struct {
 	tpu usecase.TaskPriorityUsecase
-	uu  usecase.UtilUsecase
+	ru  usecase.RoleUsecase
 }
 
 // NewTaskPriorityHandler 新しくTaskPriorityのハンドラーを作成する。
-func NewTaskPriorityHandler(tpu usecase.TaskPriorityUsecase, uu usecase.UtilUsecase) TaskPriorityHandler {
-	return &taskPriorityHandler{tpu: tpu, uu: uu}
+func NewTaskPriorityHandler(tpu usecase.TaskPriorityUsecase, ru usecase.RoleUsecase) TaskPriorityHandler {
+	return &taskPriorityHandler{tpu: tpu, ru: ru}
 }
 
 // Get taskPriority全て取得
 func (tph *taskPriorityHandler) Get() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tph.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		taskPriority, err := tph.tpu.Get()
 		if err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())
@@ -44,6 +48,9 @@ func (tph *taskPriorityHandler) Get() echo.HandlerFunc {
 
 func (tph *taskPriorityHandler) GetDetail() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tph.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := tph.getParamID(c)
 		taskPriority, err := tph.tpu.GetDetail(id)
 		if err != nil {
@@ -56,6 +63,9 @@ func (tph *taskPriorityHandler) GetDetail() echo.HandlerFunc {
 
 func (tph *taskPriorityHandler) Create() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tph.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskPriorityRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskPriorityMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -71,6 +81,9 @@ func (tph *taskPriorityHandler) Create() echo.HandlerFunc {
 
 func (tph *taskPriorityHandler) Update() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tph.ru.HasRole(c.GetAuthorID(), constant.UpdateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskPriorityRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskPriorityMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -87,6 +100,9 @@ func (tph *taskPriorityHandler) Update() echo.HandlerFunc {
 
 func (tph *taskPriorityHandler) Delete() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := tph.ru.HasRole(c.GetAuthorID(), constant.DeleteOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := tph.getParamID(c)
 		if err := tph.tpu.Delete(id); err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())

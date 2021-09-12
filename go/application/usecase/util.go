@@ -1,13 +1,10 @@
 package usecase
 
 import (
-	"wing/domain/entity"
 	"wing/domain/service"
 )
 
-type UtilUsecase interface {
-	FindUser(uint) (*entity.User, error)
-}
+type UtilUsecase interface{}
 
 type utilUsecase struct {
 	us service.UtilService
@@ -15,8 +12,4 @@ type utilUsecase struct {
 
 func NewUtilUsecase(us service.UtilService) UtilUsecase {
 	return &utilUsecase{us: us}
-}
-
-func (uu *utilUsecase) FindUser(id uint) (*entity.User, error) {
-	return uu.us.FindUser(id)
 }

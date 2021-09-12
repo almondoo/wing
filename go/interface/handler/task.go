@@ -7,6 +7,7 @@ import (
 	"wing/application/usecase"
 	"wing/interface/context"
 	"wing/interface/validation"
+	"wing/utils/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,16 +23,20 @@ type TaskHandler interface {
 // taskHandler 依存関係
 type taskHandler struct {
 	tu usecase.TaskUsecase
+	ru usecase.RoleUsecase
 }
 
 // NewTaskHandler 新しくTaskのハンドラーを作成する。
-func NewTaskHandler(tu usecase.TaskUsecase) TaskHandler {
-	return &taskHandler{tu: tu}
+func NewTaskHandler(tu usecase.TaskUsecase, ru usecase.RoleUsecase) TaskHandler {
+	return &taskHandler{tu: tu, ru: ru}
 }
 
 // Get task全て取得
 func (th *taskHandler) Get() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := th.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		tasks, err := th.tu.Get()
 		if err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())
@@ -43,6 +48,9 @@ func (th *taskHandler) Get() echo.HandlerFunc {
 
 func (th *taskHandler) GetDetail() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := th.ru.HasRole(c.GetAuthorID(), constant.GetOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := th.getParamID(c)
 		task, err := th.tu.GetDetail(id)
 		if err != nil {
@@ -55,6 +63,9 @@ func (th *taskHandler) GetDetail() echo.HandlerFunc {
 
 func (th *taskHandler) Create() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := th.ru.HasRole(c.GetAuthorID(), constant.CreateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -70,6 +81,9 @@ func (th *taskHandler) Create() echo.HandlerFunc {
 
 func (th *taskHandler) Update() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := th.ru.HasRole(c.GetAuthorID(), constant.UpdateOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		request := &validation.TaskRequest{}
 		if ok, message := c.BindValidate(request, validation.TaskMessage); !ok {
 			return c.CustomResponse(http.StatusBadRequest, message)
@@ -86,6 +100,9 @@ func (th *taskHandler) Update() echo.HandlerFunc {
 
 func (th *taskHandler) Delete() echo.HandlerFunc {
 	return context.CastContext(func(c *context.CustomContext) error {
+		if ok := th.ru.HasRole(c.GetAuthorID(), constant.DeleteOperation); !ok {
+			return c.HasNotRoleResponse()
+		}
 		id := th.getParamID(c)
 		if err := th.tu.Delete(id); err != nil {
 			return c.CustomResponse(http.StatusInternalServerError, err.Error())

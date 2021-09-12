@@ -15,16 +15,16 @@ type UserHanlder interface {
 	Register() echo.HandlerFunc
 	Logout() echo.HandlerFunc
 	Edit() echo.HandlerFunc
+	EditAssignRole() echo.HandlerFunc
 }
 
 type userHandler struct {
 	uu usecase.UserUsecase
+	ru usecase.RoleUsecase
 }
 
-func NewUserHandler(uu usecase.UserUsecase) UserHanlder {
-	return &userHandler{
-		uu: uu,
-	}
+func NewUserHandler(uu usecase.UserUsecase, ru usecase.RoleUsecase) UserHanlder {
+	return &userHandler{uu: uu, ru: ru}
 }
 
 func (uh *userHandler) Login() echo.HandlerFunc {
@@ -103,6 +103,28 @@ func (uh *userHandler) Edit() echo.HandlerFunc {
 				"Email":           user.Email,
 				"EmailVerifiedAt": user.EmailVerifiedAt,
 			},
+		})
+	})
+}
+
+// AssignRole 権限を割り当てる
+func (uh *userHandler) EditAssignRole() echo.HandlerFunc {
+	return context.CastContext(func(c *context.CustomContext) error {
+		// 権限確認
+		if ok := uh.ru.IsAdmin(c.GetAuthorID()); !ok {
+			return c.HasNotRoleResponse()
+		}
+
+		request := &validation.UserEditAssignRoleRequest{}
+		if ok, message := c.BindValidate(request, validation.UserEditAssignRoleMessage); !ok {
+			return c.CustomResponse(http.StatusBadRequest, message)
+		}
+		if err := uh.uu.EditAssignRole(request); err != nil {
+			return c.CustomResponse(http.StatusBadRequest, err.Error)
+		}
+
+		return c.CustomResponse(http.StatusOK, map[string]interface{}{
+			"message": "成功しました。",
 		})
 	})
 }
