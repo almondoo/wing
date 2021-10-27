@@ -87,23 +87,23 @@ func main() {
 	userHandler := handler.NewUserHandler(userUsecase, roleUsecase)
 	routing.InitAuthUserRouting(userHandler)
 
-	// Role関連のRouting
+	// タスク優先度関連のRouting
 	taskPriorityHandler := handler.NewTaskPriorityHandler(taskPriorityUsecase, roleUsecase)
 	routing.InitTaskPriorityRouting(taskPriorityHandler)
 
-	// Role関連のRouting
+	// タスクステータス関連のRouting
 	taskStatusHandler := handler.NewTaskStatusHandler(taskStatusUsecase, roleUsecase)
 	routing.InitTaskStatusRouting(taskStatusHandler)
 
-	// Role関連のRouting
+	// プロジェクト関連のRouting
 	projectHandler := handler.NewProjectHandler(projectUsecase, roleUsecase)
 	routing.InitProjectRouting(projectHandler)
 
-	// Role関連のRouting
+	// タスク関連のRouting
 	taskHandler := handler.NewTaskHandler(taskUsecase, roleUsecase)
 	routing.InitTaskRouting(taskHandler)
 
-	// Role関連のRouting
+	// 子タスク関連のRouting
 	taskChildHandler := handler.NewTaskChildHandler(taskChildUsecase, roleUsecase)
 	routing.InitTaskChildRouting(taskChildHandler)
 
