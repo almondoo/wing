@@ -1,5 +1,5 @@
 {
-  "extends":[
+  "extends": [
     "next",
     "next/core-web-vitals",
     "prettier",
@@ -19,6 +19,7 @@
   },
   "rules": {
     "react/jsx-filename-extension": ["error", { "extensions": [".ts", ".tsx"] }],
+    "@typescript-eslint/no-empty-function": "off",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "jsx-a11y/alt-text": [

@@ -15,3 +15,9 @@ export const maxDevice = {
   tablet: `(max-width: ${size.tablet})`,
   pc: `(max-width: ${size.pc})`,
 };
+
+export const onlyDevice = {
+  mobile: `(max-width: ${size.mobile})`,
+  tablet: `(min-width: ${size.mobile}) and (max-width: ${size.tablet})`,
+  pc: `(min-width: ${size.pc})`,
+};
